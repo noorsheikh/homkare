@@ -2,6 +2,8 @@ from aws_cdk import (
     Stack,
     RemovalPolicy,
     CfnOutput,
+    Duration,
+    BundlingOptions,
     aws_lambda as _lambda,
     aws_apigatewayv2 as apigateway,
     # aws_apigatewayv2_integrations as integrations,
@@ -30,7 +32,7 @@ class HomkareBackendStack(Stack):
             removal_policy=RemovalPolicy.DESTROY,
         )
 
-        user_pool_client = user_pool.add_client(
+        user_pool.add_client(
             "HomkareUserPoolClient",
             user_pool_client_name="homkare-user-pool-client",
             auth_flows=cognito.AuthFlow(
@@ -61,8 +63,15 @@ class HomkareBackendStack(Stack):
             "HomkareIngestLambda",
             function_name="homkare-ingest-lambda",
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset("lambda/ingest"),
+            code=_lambda.Code.from_asset(
+                "lambda/ingest",
+                bundling=BundlingOptions(
+                    image=_lambda.Runtime.PYTHON_3_10.bundling_image,
+                    command=["bash", "-c", "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output"],
+                ),
+            ),
             runtime=_lambda.Runtime.PYTHON_3_10,
+            timeout=Duration.minutes(5),
             environment={
                 "VECTOR_BUCKET": vector_bucket.vector_bucket_name,
                 "VECTOR_INDEX": vector_index.index_name,
@@ -88,6 +97,7 @@ class HomkareBackendStack(Stack):
             handler="handler.lambda_handler",
             code=_lambda.Code.from_asset("lambda/query"),
             runtime=_lambda.Runtime.PYTHON_3_10,
+            timeout=Duration.minutes(5),
             environment={
                 "VECTOR_BUCKET": vector_bucket.vector_bucket_name,
                 "VECTOR_INDEX": vector_index.index_name,
