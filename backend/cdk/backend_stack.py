@@ -1,17 +1,15 @@
 from aws_cdk import (
     Stack,
     RemovalPolicy,
-    CfnOutput,
-    Duration,
-    BundlingOptions,
     aws_lambda as _lambda,
     aws_apigatewayv2 as apigateway,
     # aws_apigatewayv2_integrations as integrations,
     aws_cognito as cognito,
-    aws_s3vectors as s3vectors,
-    aws_iam as iam,
 )
 from constructs import Construct
+
+from cdk.constructs.vector_bucket_construct import VectorBucketConstruct
+from cdk.constructs.lambda_construct import LambdaConstruct
 
 class HomkareBackendStack(Stack):
 
@@ -40,71 +38,33 @@ class HomkareBackendStack(Stack):
             ),
         )
 
-        vector_bucket = s3vectors.CfnVectorBucket(
-            self,
-            "HomkareVectorBucket",
-            vector_bucket_name="homkare-vector-bucket",
-        )
+        vector_bucket_construct = VectorBucketConstruct(self, "HomkareVectorBucket")
 
-        vector_index = s3vectors.CfnIndex(
-            self,
-            "HomkareVectorIndex",
-            index_name="homkare-vector-index",
-            data_type="float32",
-            dimension=1024,
-            distance_metric="cosine",
-            vector_bucket_name=vector_bucket.vector_bucket_name,
-        )
+        environment_variables = {
+            "VECTOR_BUCKET_NAME": vector_bucket_construct.get_vector_bucket_name(),
+            "VECTOR_INDEX_NAME": vector_bucket_construct.get_index_name(),
+        }
 
-        vector_index.add_dependency(vector_bucket)
-
-        ingest_lambda = _lambda.Function(
+        ingest_lambda = LambdaConstruct(
             self,
             "HomkareIngestLambda",
             function_name="homkare-ingest-lambda",
+            code=_lambda.Code.from_asset("main/handlers/ingest"),
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset(
-                "lambda/ingest",
-                bundling=BundlingOptions(
-                    image=_lambda.Runtime.PYTHON_3_10.bundling_image,
-                    command=["bash", "-c", "pip install -r requirements.txt -t /asset-output && cp -au . /asset-output"],
-                ),
-            ),
-            runtime=_lambda.Runtime.PYTHON_3_10,
-            timeout=Duration.minutes(5),
-            environment={
-                "VECTOR_BUCKET": vector_bucket.vector_bucket_name,
-                "VECTOR_INDEX": vector_index.index_name,
-            }
+            environment=environment_variables,
         )
 
-        vector_iam_policy = iam.PolicyStatement(
-            actions=[
-                "s3vectors:PutVectors",
-                "s3vectors:GetVectors",
-                "s3vectors:QueryVectors",
-                "bedrock:InvokeModel",
-            ],
-            resources=["*"],
-        )
+        ingest_lambda.add_to_role_policy(vector_bucket_construct.get_vector_iam_policy())
 
-        ingest_lambda.add_to_role_policy(vector_iam_policy)
-
-        query_lambda = _lambda.Function(
+        query_lambda = LambdaConstruct(
             self,
             "HomkareQueryLambda",
             function_name="homkare-query-lambda",
+            code=_lambda.Code.from_asset("main/handlers/query"),
             handler="handler.lambda_handler",
-            code=_lambda.Code.from_asset("lambda/query"),
-            runtime=_lambda.Runtime.PYTHON_3_10,
-            timeout=Duration.minutes(5),
-            environment={
-                "VECTOR_BUCKET": vector_bucket.vector_bucket_name,
-                "VECTOR_INDEX": vector_index.index_name,
-            }
+            environment=environment_variables,
         )
-
-        query_lambda.add_to_role_policy(vector_iam_policy)
+        query_lambda.add_to_role_policy(vector_bucket_construct.get_vector_iam_policy())
 
 
 

@@ -9,8 +9,8 @@ from chonkie import RecursiveChunker, RecursiveRules
 bedrock = boto3.client("bedrock-runtime")
 s3control = boto3.client("s3vectors")
 
-VECTOR_INDEX = os.environ["VECTOR_INDEX"]
-VECTOR_BUCKET = os.environ["VECTOR_BUCKET"]
+VECTOR_BUCKET_NAME = os.environ["VECTOR_BUCKET_NAME"]
+VECTOR_INDEX_NAME = os.environ["VECTOR_INDEX_NAME"]
 
 chunker = RecursiveChunker(
   tokenizer="character",
@@ -77,7 +77,7 @@ def lambda_handler(event, context):
 
   for chunk in chunks:
 
-    # Skip short and nosiy chunks
+    # Skip short and noisy chunks.
     if len(chunk.text) < 10:
       continue
 
@@ -97,8 +97,8 @@ def lambda_handler(event, context):
   print(f"Chunks processing completed!")
 
   s3control.put_vectors(
-    vectorBucketName=VECTOR_BUCKET,
-    indexName=VECTOR_INDEX,
+    vectorBucketName=VECTOR_BUCKET_NAME,
+    indexName=VECTOR_INDEX_NAME,
     vectors=vectors,
   )
 

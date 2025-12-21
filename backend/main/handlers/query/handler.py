@@ -6,8 +6,8 @@ import os
 bedrock = boto3.client("bedrock-runtime")
 s3control = boto3.client("s3vectors")
 
-VECTOR_INDEX = os.environ["VECTOR_INDEX"]
-VECTOR_BUCKET = os.environ["VECTOR_BUCKET"]
+VECTOR_BUCKET_NAME = os.environ["VECTOR_BUCKET_NAME"]
+VECTOR_INDEX_NAME = os.environ["VECTOR_INDEX_NAME"]
 
 def get_embedding(text: str):
   response = bedrock.invoke_model(
@@ -75,8 +75,8 @@ def lambda_handler(event, context):
   embedding = get_embedding(query)
 
   response = s3control.query_vectors(
-    vectorBucketName=VECTOR_BUCKET,
-    indexName=VECTOR_INDEX,
+    vectorBucketName=VECTOR_BUCKET_NAME,
+    indexName=VECTOR_INDEX_NAME,
     topK=5,
     queryVector={
       "float32": embedding,
