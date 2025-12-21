@@ -1,5 +1,6 @@
 import re
 from aws_cdk import (
+  RemovalPolicy,
   aws_s3vectors as s3vectors,
   aws_iam as iam,
 )
@@ -18,6 +19,7 @@ class VectorBucketConstruct(Construct):
         "Bucket",
         vector_bucket_name="homkare-vector-bucket",
     )
+    self._vector_bucket.apply_removal_policy(RemovalPolicy.DESTROY)
 
     self._vector_index = s3vectors.CfnIndex(
         self,

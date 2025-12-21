@@ -10,6 +10,7 @@ from constructs import Construct
 
 from cdk.constructs.vector_bucket_construct import VectorBucketConstruct
 from cdk.constructs.lambda_construct import LambdaConstruct
+from cdk.constructs.layer_construct import LayerConstruct
 
 class HomkareBackendStack(Stack):
 
@@ -40,6 +41,13 @@ class HomkareBackendStack(Stack):
 
         vector_bucket_construct = VectorBucketConstruct(self, "HomkareVectorBucket")
 
+        rag_layer = LayerConstruct(
+            self,
+            "RagCoreLambdaLayer",
+            layer_name="rag-core",
+            entry="main/layers/rag_core_lib",
+        )
+
         environment_variables = {
             "VECTOR_BUCKET_NAME": vector_bucket_construct.get_vector_bucket_name(),
             "VECTOR_INDEX_NAME": vector_bucket_construct.get_index_name(),
@@ -51,6 +59,7 @@ class HomkareBackendStack(Stack):
             function_name="homkare-ingest-lambda",
             code=_lambda.Code.from_asset("main/handlers/ingest"),
             handler="handler.lambda_handler",
+            layers=[rag_layer.get_layer()],
             environment=environment_variables,
         )
 
@@ -62,6 +71,7 @@ class HomkareBackendStack(Stack):
             function_name="homkare-query-lambda",
             code=_lambda.Code.from_asset("main/handlers/query"),
             handler="handler.lambda_handler",
+            layers=[rag_layer.get_layer()],
             environment=environment_variables,
         )
         query_lambda.add_to_role_policy(vector_bucket_construct.get_vector_iam_policy())
