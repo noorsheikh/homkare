@@ -27,6 +27,7 @@ def lambda_handler(event, context):
   )
 
   results = response.get("vectors", [])
+  print(f"vectors: {results}")
 
   final_answer = generate_answer(query, results)
 

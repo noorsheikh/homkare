@@ -75,7 +75,3 @@ class HomkareBackendStack(Stack):
             environment=environment_variables,
         )
         query_lambda.add_to_role_policy(vector_bucket_construct.get_vector_iam_policy())
-
-
-
-

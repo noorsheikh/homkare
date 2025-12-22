@@ -5,6 +5,7 @@ import time
 import hashlib
 
 from rag_engine import get_chunks, get_embedding, Config
+from models import BaseVectorMetadata
 
 s3vector = boto3.client("s3vectors")
 
@@ -35,7 +36,7 @@ def lambda_handler(event, context):
       filter={
         "$and": [
           {"user_id": user_id},
-          {"text_hash": chunk_hash}
+          {"chunk_hash": chunk_hash}
         ],
       },
       returnMetadata=True,
@@ -51,18 +52,23 @@ def lambda_handler(event, context):
             continue
 
 
+    # Metadata for the new vector.
+    metadata = BaseVectorMetadata(
+      user_id=user_id,
+      visibility="private",
+      source="file",
+      chunk_text=chunk.text,
+      chunk_hash=chunk_hash,
+    )
     new_vectors.append({
       "key": str(uuid.uuid4()),
         "data": {"float32": chunk_embedding},
-        "metadata": {
-          "user_id": user_id,
-          "text": chunk.text,
-          "text_hash": chunk_hash,
-        },
+        "metadata": metadata.to_s3_metadata(),
     })
     time.sleep(0.1)  # 100ms delay = max 600 requests per minute.
 
-  print(f"Chunks processing completed!")
+  print("Chunks processing completed")
+  print(f"Inserting {len(new_vectors)} vectors to the storage")
 
   # Batch insert only new vectors.
   if new_vectors:
@@ -71,7 +77,7 @@ def lambda_handler(event, context):
       indexName=Config.VECTOR_INDEX,
       vectors=new_vectors,
     )
-    print(f"Successfully inserted {len(new_vectors)} new vectors.")
+    print(f"Successfully inserted {len(new_vectors)} new vectors")
   else:
     print("No new vectors to insert.")
 
