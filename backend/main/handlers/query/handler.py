@@ -1,7 +1,7 @@
 import json
 import boto3
 
-from rag_engine import generate_answer, get_embedding, Config
+from rag_engine import generate_answer, get_embedding, rerank_chunks, Config
 
 s3vector = boto3.client("s3vectors")
 
@@ -20,16 +20,33 @@ def lambda_handler(event, context):
       "float32": get_embedding(query),
     },
     filter={
-      "user_id": user_id,
+      "$and": [
+        {"user_id": user_id},
+        {"visibility": "private"},
+      ],
     },
     returnMetadata=True,
     returnDistance=True,
   )
 
-  results = response.get("vectors", [])
-  print(f"vectors: {results}")
+  vectors = response.get("vectors", [])
 
-  final_answer = generate_answer(query, results)
+  if not vectors:
+    return {
+      "statusCode": 200,
+      "body": json.dumps({
+        "answer": "I don't have enough information to answer that."
+      })
+    }
+
+  # Rerank the initially vector chunks to show best matching result.
+  top_chunks = rerank_chunks(
+    query=query,
+    chunks=vectors,
+    max_chunks=6,
+  )
+
+  final_answer = generate_answer(query, top_chunks)
 
   return {
     "statusCode": 200,
