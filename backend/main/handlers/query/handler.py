@@ -15,7 +15,7 @@ def lambda_handler(event, context):
   response = s3vector.query_vectors(
     vectorBucketName=Config.VECTOR_BUCKET,
     indexName=Config.VECTOR_INDEX,
-    topK=5,
+    topK=20,
     queryVector={
       "float32": get_embedding(query),
     },

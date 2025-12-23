@@ -13,8 +13,11 @@ def generate_answer(query: str, context_chunks: list) -> str:
         for i, c in enumerate(context_chunks)
     ])
 
-    prompt = f"""Instruction: Answer the user's question using ONLY the context provided.
-    If the answer is not in the context, say "I'm sorry, I don't have that info."
+    prompt = f"""You are an assistant for homeowners and HOA members.
+
+    Use ONLY the provided context to answer.
+    If the answer is not in the context, say:
+    "I don’t have enough information to answer that."
 
     Context:
     {context_text}
@@ -23,21 +26,25 @@ def generate_answer(query: str, context_chunks: list) -> str:
 
     Answer:"""
 
-    body = json.dumps({
-        "inputText": prompt,
-        "textGenerationConfig": {
-            "maxTokenCount": 512,
-            "temperature": 0.1,
-            "topP": 0.9
-        }
+    # Format the request payload using the model's native structure.
+    request = json.dumps({
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 512,
+        "temperature": 0.5,
+        "messages": [
+            {
+                "role": "user",
+                "content": [{"type": "text", "text": prompt}],
+            }
+        ],
     })
 
     response = bedrock.invoke_model(
         modelId=Config.GENERATION_MODEL,
-        body=body,
+        body=request,
         contentType="application/json",
         accept="application/json"
     )
 
     response_body = json.loads(response.get("body").read())
-    return response_body['results'][0]['outputText'].strip()
+    return response_body["content"][0]["text"].strip()
