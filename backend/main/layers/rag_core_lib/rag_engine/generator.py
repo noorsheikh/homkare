@@ -16,6 +16,7 @@ def generate_answer(query: str, context_chunks: list) -> str:
     prompt = f"""You are an assistant for homeowners and HOA members.
 
     Use ONLY the provided context to answer.
+    Do NOT mention "Based on the provided context", just start with your answer.
     If the answer is not in the context, say:
     "I don’t have enough information to answer that."
 

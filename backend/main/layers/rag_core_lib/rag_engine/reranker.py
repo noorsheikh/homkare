@@ -1,65 +1,59 @@
 import json
 import boto3
+import concurrent.futures
+
 from .config import Config
 
 bedrock = boto3.client("bedrock-runtime")
 
-def rerank_chunks(
+def _get_single_chunk_score(
     query: str,
-    chunks: list[dict],
-    max_chunks: int = 6,
+    chunk: dict,
 ) -> list[dict]:
-  """Cross-encoder reranker to re-rank the chunks to find the more relevant chunk to a given query."""
-  scored_chunks = []
+  """Helper to get score for one chunk (Parallelizable)."""
+  text = chunk["metadata"]["chunk_text"]
+  prompt = f"Score the relevance of this chunk to the question: '{query}'.\nChunk: {text}\nReturn ONLY a number 0-10."
 
-  for chunk in chunks:
-    text = chunk["metadata"]["chunk_text"]
+  # Correct Messages API Payload for Claude 3.5 Haiku.
+  body = json.dumps({
+      "anthropic_version": "bedrock-2023-05-31",
+      "max_tokens": 10,
+      "temperature": 0,
+      "messages": [
+          {"role": "user", "content": [{"type": "text", "text": prompt}]}
+      ]
+  })
 
-    prompt = f"""
-    You are scoring how relevant a document chunk is to a question.
+  try:
+      response = bedrock.invoke_model(
+          modelId=Config.RERANKER_MODEL,
+          body=body,
+          contentType="application/json"
+      )
 
-    Question:
-    {query}
+      # Correct Parsing for Messages API
+      response_body = json.loads(response["body"].read().decode("utf-8"))
+      raw_text = response_body["content"][0]["text"].strip()
 
-    Chunk:
-    {text}
+      # Extract numeric value safely
+      score = float("".join(c for c in raw_text if c.isdigit() or c == "."))
+      chunk["metadata"]["rerank_score"] = score
+  except Exception as e:
+      print(f"Error scoring chunk: {e}")
+      chunk["metadata"]["rerank_score"] = 0.0
 
-    Score relevance from 0 to 10.
-    Return ONLY the number.
-    """
+  return chunk
 
-    request = json.dumps({
-        "anthropic_version": "bedrock-2023-05-31",
-        "max_tokens": 5,
-        "temperature": 0.0,
-        "messages": [
-            {
-                "role": "user",
-                "content": [{"type": "text", "text": prompt}],
-            }
-        ],
-    })
-    print("reranker model: ", Config.RERANKER_MODEL)
+def rerank_chunks(
+      query: str,
+      chunks: list[dict],
+) -> list[dict]:
+  """Uses Parallel threads to rerank chunks."""
 
-    response = bedrock.invoke_model(
-        modelId=Config.RERANKER_MODEL,
-        body=request,
-        contentType="application/json",
-        accept="application/json"
-    )
+  # Using ThreatPoolExecutor to run LLM calls in parallel.
+  with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+      scored_chunks = list(executor.map(lambda c: _get_single_chunk_score(query, c), chunks))
 
-    raw = response["body"].read().decode("utf-8")
-    print("raw: ", raw)
-    score = float("".join(c for c in raw if c.isdigit() or c == "."))
-    print("score: ", score)
-
-    chunk["metadata"]["rerank_score"] = score
-    scored_chunks.append(chunk)
-
-  scored_chunks.sort(
-    key=lambda x: x["metadata"]["rerank_score"],
-    reverse=True,
-  )
-
-
-  return scored_chunks[:max_chunks]
+  # Pick only the chunks with score greater than or equal to 5.0.
+  scored_chunks = [chunk for chunk in scored_chunks if chunk["metadata"]["rerank_score"] >= 5.0]
+  return scored_chunks

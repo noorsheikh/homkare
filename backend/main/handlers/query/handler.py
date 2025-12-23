@@ -46,6 +46,14 @@ def lambda_handler(event, context):
     max_chunks=6,
   )
 
+  if not top_chunks:
+    return {
+      "statusCode": 200,
+      "body": json.dumps({
+        "answer": "I don't have enough information to answer that."
+      })
+    }
+
   final_answer = generate_answer(query, top_chunks)
 
   return {
