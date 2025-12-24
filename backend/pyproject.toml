@@ -16,6 +16,9 @@ dev = [
     "ruff>=0.14.10",
 ]
 
+[tool.ruff]
+line-length = 100
+
 [tool.ruff.lint]
 select = [
   # pydocstyle
@@ -25,6 +28,18 @@ select = [
   # Pyflakes
   "F",
   # isort
-  "I"
+  "I",
+  "Q"
 ]
-ignore = ["F401"]
+ignore = ["F401", "Q001", "Q002"]
+
+[tool.ruff.lint.flake8-quotes]
+avoid-escape = false
+docstring-quotes = "single"
+inline-quotes = "single"
+multiline-quotes = "single"
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "tab"
+docstring-code-format = true

@@ -15,3 +15,7 @@ Install [UV](https://docs.astral.sh/uv/) to manage python libraries.
 ```bash
 uv sync
 ```
+
+### Technical Notes
+
+For styling follow [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings).

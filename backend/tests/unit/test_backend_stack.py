@@ -6,9 +6,9 @@ from backend.cdk.backend_stack import HomkareBackendStack
 # example tests. To run these tests, uncomment this file along with the example
 # resource in backend/backend_stack.py
 def test_sqs_queue_created():
-    app = core.App()
-    stack = HomkareBackendStack(app, "HomkareBackendStack")
-    assertions.Template.from_stack(stack)
+	app = core.App()
+	stack = HomkareBackendStack(app, 'HomkareBackendStack')
+	assertions.Template.from_stack(stack)
 
 
 #     template.has_resource_properties("AWS::SQS::Queue", {
