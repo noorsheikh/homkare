@@ -1,3 +1,5 @@
+"""Unit tests for the Homkare backend CDK stack."""
+
 import aws_cdk as core
 import aws_cdk.assertions as assertions
 from backend.cdk.backend_stack import HomkareBackendStack
@@ -6,6 +8,7 @@ from backend.cdk.backend_stack import HomkareBackendStack
 # example tests. To run these tests, uncomment this file along with the example
 # resource in backend/backend_stack.py
 def test_sqs_queue_created():
+	"""Tests coverage for Homkare Backend Stack."""
 	app = core.App()
 	stack = HomkareBackendStack(app, 'HomkareBackendStack')
 	assertions.Template.from_stack(stack)

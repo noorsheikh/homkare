@@ -22,7 +22,7 @@ line-length = 90
 [tool.ruff.lint]
 select = [
   # pydocstyle
-  # "D",
+  "D",
   # pycodestyle
   "E",
   # Pyflakes
@@ -31,7 +31,7 @@ select = [
   "I",
   "Q"
 ]
-ignore = ["F401", "Q001", "Q002"]
+ignore = ["F401", "Q001", "Q002", "D104", "D213", "D203", "D206"]
 
 [tool.ruff.lint.flake8-quotes]
 avoid-escape = false

@@ -1,3 +1,5 @@
+"""Module for reranking text chunks using Amazon Bedrock."""
+
 import concurrent.futures
 import json
 
@@ -12,7 +14,19 @@ def _get_single_chunk_score(
 	query: str,
 	chunk: dict,
 ) -> list[dict]:
-	"""Helper to get score for one chunk (Parallelizable)."""
+	"""Score the relevance of a single chunk against the query.
+
+	Use a prompt-based evaluation via the configured Bedrock model to
+	assign a numeric relevance score (0-10) to the chunk metadata.
+
+	Args:
+		query: The user's search query.
+		chunk: A dictionary containing the text and metadata.
+
+	Returns:
+		The updated chunk dictionary including the 'rerank_score'.
+
+	"""
 	text = chunk['metadata']['chunk_text']
 	prompt = f"""
     Score the relevance of this chunk to the question: '{query}'.\nChunk: {text}\n
@@ -52,7 +66,19 @@ def rerank_chunks(
 	query: str,
 	chunks: list[dict],
 ) -> list[dict]:
-	"""Uses Parallel threads to rerank chunks."""
+	"""Rerank a list of chunks based on query relevance using parallel threads.
+
+	Execute multiple LLM scoring calls concurrently via ThreadPoolExecutor
+	and filter the results to return only highly relevant segments.
+
+	Args:
+		query: The search query to compare against.
+		chunks: A list of chunk dictionaries to be scored.
+
+	Returns:
+		A list of chunks with a rerank_score of 5.0 or higher.
+
+	"""
 	# Using ThreatPoolExecutor to run LLM calls in parallel.
 	with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
 		scored_chunks = list(

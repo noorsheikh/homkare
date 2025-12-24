@@ -1,9 +1,12 @@
+"""Module for managing RAG Engine configurations."""
+
 import os
 
 
 class Config:
-	"""Centralized configuration for the RAG Engine.
-	Loads and validates environment variables.
+	"""Provide centralized configuration for the RAG Engine.
+
+	Load and validate environment variables required for RAG Engine.
 	"""
 
 	VECTOR_BUCKET = os.environ.get('VECTOR_BUCKET_NAME')
@@ -23,6 +26,13 @@ class Config:
 
 	@classmethod
 	def validate(cls):
-		"""Ensures all required variables are present."""
+		"""Ensure all required environment variables are present.
+
+		Check for the existence of VECTOR_BUCKET and VECTOR_INDEX.
+
+		Raises:
+				EnvironmentError: If required bucket or index names are missing.
+
+		"""
 		if not cls.VECTOR_BUCKET or not cls.VECTOR_INDEX:
 			raise EnvironmentError('Missing VECTOR_BUCKET_NAME OR VECTOR_INDEX_NAME')

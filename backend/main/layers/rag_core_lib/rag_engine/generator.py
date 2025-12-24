@@ -1,3 +1,5 @@
+"""Module for generating RAG-based answers using Amazon Bedrock."""
+
 import json
 
 import boto3
@@ -8,7 +10,21 @@ bedrock = boto3.client('bedrock-runtime')
 
 
 def generate_answer(query: str, context_chunks: list) -> str:
-	"""Synthesizes a final answer using Titan Text Express based on context."""
+	"""Synthesize a final answer based on provided source context.
+
+	Assemble context chunks into a numbered list, construct a focused
+	instructional prompt for the LLM, and return the generated
+	text response.
+
+	Args:
+		query: The user's original question.
+		context_chunks: A list of retrieved and reranked text segments.
+
+	Returns:
+		A string containing the synthesized answer or a fallback
+		message if information is missing.
+
+	"""
 	context_text = '\n\n'.join(
 		[
 			f'Source {i + 1}: {c["metadata"]["chunk_text"]}'

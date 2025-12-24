@@ -1,3 +1,10 @@
+"""Module for recursive text chunking using Chonkie.
+
+This module provides a standardized interface for cleaning raw text and
+splitting it into manageable, semantic chunks using a configured
+RecursiveChunker instance.
+"""
+
 import re
 
 from chonkie import RecursiveChunker, RecursiveRules
@@ -14,8 +21,17 @@ _chunker = RecursiveChunker(
 
 
 def clean_data(text: str) -> str:
-	"""Standardizes raw text by removing TOC leaders, fixing hyphens,
-	and normalizing whitespace.
+	"""Standardize raw text for processing.
+
+	Remove TOC leaders, fix broken hyphens, strip special characters,
+	and normalize whitespace to return a lowercase, trimmed string.
+
+	Args:
+		text: The raw input string to be cleaned.
+
+	Returns:
+		The standardized and cleaned string.
+
 	"""
 	text = re.sub(r'(?:\.\s?){3,}\s*\d*', ' ', text)
 	text = re.sub(r'(\w+)-\s+(\w+)', r'\1\2', text)
@@ -25,6 +41,17 @@ def clean_data(text: str) -> str:
 
 
 def get_chunks(text: str):
-	"""Cleans and splits text into semantic chunks."""
+	"""Clean and split text into semantic chunks.
+
+	First standardize the input text using clean_data, then apply
+	the module-level RecursiveChunker to generate text segments.
+
+	Args:
+		text: The input text to be segmented.
+
+	Returns:
+		A list or generator of text chunks.
+
+	"""
 	cleaned = clean_data(text)
 	return _chunker.chunk(cleaned)

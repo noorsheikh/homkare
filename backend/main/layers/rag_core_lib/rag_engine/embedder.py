@@ -1,3 +1,5 @@
+"""Module for interacting with Amazon Bedrock to generate vector embeddings."""
+
 import json
 
 import boto3
@@ -18,7 +20,18 @@ bedrock = boto3.client('bedrock-runtime', config=retry_config)
 
 
 def get_embedding(text: str):
-	"""Generats a 1024-dimensional vector embedding for the given text."""
+	"""Generate a 1024-dimensional vector embedding for the given text.
+
+	Use the configured Bedrock embedding model to transform the input
+	string into a numerical vector representation.
+
+	Args:
+		text: The string to be embedded.
+
+	Returns:
+		A list of floats representing the 1024-dimensional embedding.
+
+	"""
 	body = json.dumps(
 		{
 			'inputText': text,
