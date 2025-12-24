@@ -55,8 +55,12 @@ def rerank_chunks(
 	"""Uses Parallel threads to rerank chunks."""
 	# Using ThreatPoolExecutor to run LLM calls in parallel.
 	with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-		scored_chunks = list(executor.map(lambda c: _get_single_chunk_score(query, c), chunks))
+		scored_chunks = list(
+			executor.map(lambda c: _get_single_chunk_score(query, c), chunks)
+		)
 
 	# Pick only the chunks with score greater than or equal to 5.0.
-	scored_chunks = [chunk for chunk in scored_chunks if chunk['metadata']['rerank_score'] >= 5.0]
+	scored_chunks = [
+		chunk for chunk in scored_chunks if chunk['metadata']['rerank_score'] >= 5.0
+	]
 	return scored_chunks

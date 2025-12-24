@@ -10,7 +10,10 @@ bedrock = boto3.client('bedrock-runtime')
 def generate_answer(query: str, context_chunks: list) -> str:
 	"""Synthesizes a final answer using Titan Text Express based on context."""
 	context_text = '\n\n'.join(
-		[f'Source {i + 1}: {c["metadata"]["chunk_text"]}' for i, c in enumerate(context_chunks)]
+		[
+			f'Source {i + 1}: {c["metadata"]["chunk_text"]}'
+			for i, c in enumerate(context_chunks)
+		]
 	)
 
 	prompt = f"""You are an assistant for homeowners and HOA members.

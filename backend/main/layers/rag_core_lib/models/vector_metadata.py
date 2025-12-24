@@ -67,7 +67,8 @@ class BaseVectorMetadata(BaseModel):
 
 		# Force everything to primitives S3 accepts.
 		return {
-			k: (v if isinstance(v, (str, int, float, bool)) else str(v)) for k, v in data.items()
+			k: (v if isinstance(v, (str, int, float, bool)) else str(v))
+			for k, v in data.items()
 		}
 
 
@@ -90,7 +91,9 @@ class FileVectorMetadata(BaseVectorMetadata):
 class TextVectorMetadata(BaseVectorMetadata):
 	source: Source = 'text'
 
-	context_id: str = Field(..., description='Logical grouping of text (note_id, section_id, etc.)')
+	context_id: str = Field(
+		..., description='Logical grouping of text (note_id, section_id, etc.)'
+	)
 
 	chunk_index: int = Field(..., description='Chunk index within the file')
 

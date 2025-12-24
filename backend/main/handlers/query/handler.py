@@ -35,7 +35,9 @@ def lambda_handler(event, context):
 	if not vectors:
 		return {
 			'statusCode': 200,
-			'body': json.dumps({'answer': "I don't have enough information to answer that."}),
+			'body': json.dumps(
+				{'answer': "I don't have enough information to answer that."}
+			),
 		}
 
 	# Rerank the initially vector chunks to show best matching result.
@@ -47,7 +49,9 @@ def lambda_handler(event, context):
 	if not top_chunks:
 		return {
 			'statusCode': 200,
-			'body': json.dumps({'answer': "I don't have enough information to answer that."}),
+			'body': json.dumps(
+				{'answer': "I don't have enough information to answer that."}
+			),
 		}
 
 	final_answer = generate_answer(query, top_chunks)
