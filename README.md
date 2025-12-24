@@ -10,6 +10,8 @@ source .venv/bin/activate
 
 After activating the virtual environment, install app's standard dependencies.
 
+Install [UV](https://docs.astral.sh/uv/) to manage python libraries.
+
 ```bash
-python -m pip install -r requirements.txt
+uv sync
 ```
