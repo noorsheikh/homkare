@@ -43,7 +43,6 @@ def lambda_handler(event, context):
   top_chunks = rerank_chunks(
     query=query,
     chunks=vectors,
-    max_chunks=6,
   )
 
   if not top_chunks:
