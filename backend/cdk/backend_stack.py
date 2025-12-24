@@ -2,8 +2,6 @@ from aws_cdk import (
     Stack,
     RemovalPolicy,
     aws_lambda as _lambda,
-    aws_apigatewayv2 as apigateway,
-    # aws_apigatewayv2_integrations as integrations,
     aws_cognito as cognito,
 )
 from constructs import Construct
@@ -12,8 +10,8 @@ from cdk.constructs.vector_bucket_construct import VectorBucketConstruct
 from cdk.constructs.lambda_construct import LambdaConstruct
 from cdk.constructs.layer_construct import LayerConstruct
 
-class HomkareBackendStack(Stack):
 
+class HomkareBackendStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
@@ -63,7 +61,9 @@ class HomkareBackendStack(Stack):
             environment=environment_variables,
         )
 
-        ingest_lambda.add_to_role_policy(vector_bucket_construct.get_vector_iam_policy())
+        ingest_lambda.add_to_role_policy(
+            vector_bucket_construct.get_vector_iam_policy()
+        )
 
         query_lambda = LambdaConstruct(
             self,

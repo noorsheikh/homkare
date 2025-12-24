@@ -1,1 +1,0 @@
-from .vector_metadata import BaseVectorMetadata, FileVectorMetadata, TextVectorMetadata, ChatVectorMetadata, PublicVectorMetadata

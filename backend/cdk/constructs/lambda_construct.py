@@ -8,6 +8,7 @@ from aws_cdk import (
 )
 from constructs import Construct
 
+
 class LambdaConstruct(Construct):
     _lambda_function: _lambda.Function
 
@@ -46,7 +47,7 @@ class LambdaConstruct(Construct):
         )
 
     def get_lambda_function(self) -> _lambda.Function:
-      return self._lambda_function
+        return self._lambda_function
 
     def add_to_role_policy(self, policy_statement: iam.PolicyStatement) -> None:
-      self._lambda_function.add_to_role_policy(policy_statement)
+        self._lambda_function.add_to_role_policy(policy_statement)
