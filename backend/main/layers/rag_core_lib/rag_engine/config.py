@@ -2,8 +2,7 @@ import os
 
 
 class Config:
-    """
-    Centralized configuration for the RAG Engine.
+    """Centralized configuration for the RAG Engine.
     Loads and validates environment variables.
     """
 

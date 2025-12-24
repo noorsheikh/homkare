@@ -1,10 +1,17 @@
-from typing import Optional, Mapping
+from typing import Mapping, Optional
+
 from aws_cdk import (
     Duration,
     RemovalPolicy,
-    aws_lambda as _lambda,
-    aws_logs as logs,
+)
+from aws_cdk import (
     aws_iam as iam,
+)
+from aws_cdk import (
+    aws_lambda as _lambda,
+)
+from aws_cdk import (
+    aws_logs as logs,
 )
 from constructs import Construct
 

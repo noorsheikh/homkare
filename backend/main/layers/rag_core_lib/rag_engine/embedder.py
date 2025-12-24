@@ -1,6 +1,8 @@
 import json
+
 import boto3
 from botocore.config import Config as BotoConfig
+
 from .config import Config
 
 retry_config = BotoConfig(

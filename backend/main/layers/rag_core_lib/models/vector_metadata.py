@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, model_validator
-from typing import Optional, Literal
+from typing import Literal, Optional
+
 import pendulum
+from pydantic import BaseModel, Field, model_validator
 
 Visibility = Literal["private", "tenant", "public"]
 
@@ -20,7 +21,9 @@ class BaseVectorMetadata(BaseModel):
 
     visibility: Visibility = Field(
         ...,
-        description="Access scope: private (user), tenant (community), public (platform)",
+        description="""
+        Access scope: private (user), tenant (community), public (platform)
+        """,
     )
 
     source: Source = Field(
@@ -57,8 +60,7 @@ class BaseVectorMetadata(BaseModel):
         return self
 
     def to_s3_metadata(self) -> dict[str, str | int | float | bool]:
-        """
-        Convert metadata to S3 Vector compatible format.
+        """Convert metadata to S3 Vector compatible format.
         Ensures ONLY primitives are returned.
         """
         data = self.model_dump(mode="json", exclude_none=True)

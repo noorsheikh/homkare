@@ -1,6 +1,7 @@
-import json
-import boto3
 import concurrent.futures
+import json
+
+import boto3
 
 from .config import Config
 
@@ -13,7 +14,10 @@ def _get_single_chunk_score(
 ) -> list[dict]:
     """Helper to get score for one chunk (Parallelizable)."""
     text = chunk["metadata"]["chunk_text"]
-    prompt = f"Score the relevance of this chunk to the question: '{query}'.\nChunk: {text}\nReturn ONLY a number 0-10."
+    prompt = f"""
+    Score the relevance of this chunk to the question: '{query}'.\nChunk: {text}\n
+    Return ONLY a number 0-10.
+    """
 
     # Correct Messages API Payload for Claude 3.5 Haiku.
     body = json.dumps(
@@ -51,7 +55,6 @@ def rerank_chunks(
     chunks: list[dict],
 ) -> list[dict]:
     """Uses Parallel threads to rerank chunks."""
-
     # Using ThreatPoolExecutor to run LLM calls in parallel.
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         scored_chunks = list(

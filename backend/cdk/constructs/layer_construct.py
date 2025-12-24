@@ -1,5 +1,7 @@
 from aws_cdk import (
     aws_lambda as _lambda,
+)
+from aws_cdk import (
     aws_lambda_python_alpha as python_lambda,
 )
 from constructs import Construct

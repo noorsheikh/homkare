@@ -1,14 +1,18 @@
 from aws_cdk import (
-    Stack,
     RemovalPolicy,
-    aws_lambda as _lambda,
+    Stack,
+)
+from aws_cdk import (
     aws_cognito as cognito,
+)
+from aws_cdk import (
+    aws_lambda as _lambda,
 )
 from constructs import Construct
 
-from cdk.constructs.vector_bucket_construct import VectorBucketConstruct
 from cdk.constructs.lambda_construct import LambdaConstruct
 from cdk.constructs.layer_construct import LayerConstruct
+from cdk.constructs.vector_bucket_construct import VectorBucketConstruct
 
 
 class HomkareBackendStack(Stack):

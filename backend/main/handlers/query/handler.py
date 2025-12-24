@@ -1,7 +1,7 @@
 import json
-import boto3
 
-from rag_engine import generate_answer, get_embedding, rerank_chunks, Config
+import boto3
+from rag_engine import Config, generate_answer, get_embedding, rerank_chunks
 
 s3vector = boto3.client("s3vectors")
 

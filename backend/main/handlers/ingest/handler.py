@@ -1,11 +1,11 @@
-import json
-import boto3
-import uuid
-import time
 import hashlib
+import json
+import time
+import uuid
 
-from rag_engine import get_chunks, get_embedding, Config
+import boto3
 from models import BaseVectorMetadata
+from rag_engine import Config, get_chunks, get_embedding
 
 s3vector = boto3.client("s3vectors")
 

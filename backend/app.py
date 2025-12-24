@@ -4,7 +4,6 @@ import aws_cdk as cdk
 
 from cdk.backend_stack import HomkareBackendStack
 
-
 app = cdk.App()
 HomkareBackendStack(
     app,

@@ -1,8 +1,8 @@
 import re
 
 from chonkie import RecursiveChunker, RecursiveRules
-from .config import Config
 
+from .config import Config
 
 # Initialize chunker once at the module level for efficiency.
 _chunker = RecursiveChunker(
@@ -14,8 +14,7 @@ _chunker = RecursiveChunker(
 
 
 def clean_data(text: str) -> str:
-    """
-    Standardizes raw text by removing TOC leaders, fixing hyphens,
+    """Standardizes raw text by removing TOC leaders, fixing hyphens,
     and normalizing whitespace.
     """
     text = re.sub(r"(?:\.\s?){3,}\s*\d*", " ", text)

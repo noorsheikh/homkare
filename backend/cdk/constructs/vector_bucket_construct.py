@@ -1,7 +1,11 @@
 from aws_cdk import (
     RemovalPolicy,
-    aws_s3vectors as s3vectors,
+)
+from aws_cdk import (
     aws_iam as iam,
+)
+from aws_cdk import (
+    aws_s3vectors as s3vectors,
 )
 from constructs import Construct
 

@@ -1,14 +1,14 @@
 import json
+
 import boto3
+
 from .config import Config
 
 bedrock = boto3.client("bedrock-runtime")
 
 
 def generate_answer(query: str, context_chunks: list) -> str:
-    """
-    Synthesizes a final answer using Titan Text Express based on context.
-    """
+    """Synthesizes a final answer using Titan Text Express based on context."""
     context_text = "\n\n".join(
         [
             f"Source {i + 1}: {c['metadata']['chunk_text']}"

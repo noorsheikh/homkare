@@ -1,6 +1,5 @@
 import aws_cdk as core
 import aws_cdk.assertions as assertions
-
 from backend.cdk.backend_stack import HomkareBackendStack
 
 
