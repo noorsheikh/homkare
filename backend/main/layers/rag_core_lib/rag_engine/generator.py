@@ -2,11 +2,11 @@
 
 import json
 
-import boto3
+from clients.factory import get_bedrock_client
 
 from .config import Config
 
-bedrock = boto3.client('bedrock-runtime')
+bedrock_client = get_bedrock_client()
 
 
 def generate_answer(query: str, context_chunks: list) -> str:
@@ -61,7 +61,7 @@ def generate_answer(query: str, context_chunks: list) -> str:
 		}
 	)
 
-	response = bedrock.invoke_model(
+	response = bedrock_client.invoke_model(
 		modelId=Config.GENERATION_MODEL,
 		body=request,
 		contentType='application/json',

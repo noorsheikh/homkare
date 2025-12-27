@@ -2,21 +2,11 @@
 
 import json
 
-import boto3
-from botocore.config import Config as BotoConfig
+from clients.factory import get_bedrock_client
 
 from .config import Config
 
-retry_config = BotoConfig(
-	retries={
-		'max_attempts': 10,
-		'mode': 'adaptive',
-	},
-	connect_timeout=10,
-	read_timeout=10,
-)
-
-bedrock = boto3.client('bedrock-runtime', config=retry_config)
+bedrock_client = get_bedrock_client()
 
 
 def get_embedding(text: str):
@@ -39,7 +29,7 @@ def get_embedding(text: str):
 		}
 	)
 
-	response = bedrock.invoke_model(
+	response = bedrock_client.invoke_model(
 		modelId=Config.EMBEDDING_MODEL,
 		body=body,
 		contentType='application/json',

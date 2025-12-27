@@ -3,11 +3,11 @@ import json
 import time
 import uuid
 
-import boto3
+from clients.factory import get_s3_vector_client
 from models import BaseVectorMetadata
 from rag_engine import Config, get_chunks, get_embedding
 
-s3vector = boto3.client('s3vectors')
+s3vector_client = get_s3_vector_client()
 
 
 def lambda_handler(event, context):
@@ -29,7 +29,7 @@ def lambda_handler(event, context):
 		chunk_embedding = get_embedding(chunk.text)
 
 		# Check if a chunk already exist with same embedding and tags.
-		existing_check = s3vector.query_vectors(
+		existing_check = s3vector_client.query_vectors(
 			vectorBucketName=Config.VECTOR_BUCKET,
 			indexName=Config.VECTOR_INDEX,
 			topK=1,
@@ -71,7 +71,7 @@ def lambda_handler(event, context):
 
 	# Batch insert only new vectors.
 	if new_vectors:
-		s3vector.put_vectors(
+		s3vector_client.put_vectors(
 			vectorBucketName=Config.VECTOR_BUCKET,
 			indexName=Config.VECTOR_INDEX,
 			vectors=new_vectors,

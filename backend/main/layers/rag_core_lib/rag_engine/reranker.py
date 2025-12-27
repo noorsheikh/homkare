@@ -2,12 +2,15 @@
 
 import concurrent.futures
 import json
+import random
+import time
 
-import boto3
+from botocore.exceptions import ClientError
+from clients.factory import get_bedrock_client
 
 from .config import Config
 
-bedrock = boto3.client('bedrock-runtime')
+bedrock_client = get_bedrock_client()
 
 
 def _get_single_chunk_score(
@@ -44,7 +47,7 @@ def _get_single_chunk_score(
 	)
 
 	try:
-		response = bedrock.invoke_model(
+		response = bedrock_client.invoke_model(
 			modelId=Config.RERANKER_MODEL, body=body, contentType='application/json'
 		)
 
@@ -65,6 +68,7 @@ def _get_single_chunk_score(
 def rerank_chunks(
 	query: str,
 	chunks: list[dict],
+	max_retries: int = 6,
 ) -> list[dict]:
 	"""Rerank a list of chunks based on query relevance using parallel threads.
 
@@ -74,16 +78,33 @@ def rerank_chunks(
 	Args:
 		query: The search query to compare against.
 		chunks: A list of chunk dictionaries to be scored.
+		max_retries: Max attempts per chunk to handle ThrottlingException.
 
 	Returns:
 		A list of chunks with a rerank_score of 5.0 or higher.
 
 	"""
+
+	def _safe_get_score(chunk):
+		"""Wrap individual chunk scoring with retries."""
+		for attempt in range(max_retries):
+			try:
+				# Assuming this function uses your shared bedrock client
+				return _get_single_chunk_score(query, chunk)
+			except ClientError as e:
+				error_code = e.response.get('Error', {}).get('Code')
+				if error_code == 'ThrottlingException' and attempt < max_retries - 1:
+					# Exponential backoff: 1s, 2s, 4s... with random jitter
+					sleep_time = (2**attempt) + random.uniform(0, 1)
+					print(f'Throttled. Retrying chunk in {sleep_time:.2f}s...')
+					time.sleep(sleep_time)
+					continue
+				raise e  # Re-raise if max retries reached or different error
+		return chunk
+
 	# Using ThreatPoolExecutor to run LLM calls in parallel.
 	with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-		scored_chunks = list(
-			executor.map(lambda c: _get_single_chunk_score(query, c), chunks)
-		)
+		scored_chunks = list(executor.map(_safe_get_score, chunks))
 
 	# Pick only the chunks with score greater than or equal to 5.0.
 	scored_chunks = [

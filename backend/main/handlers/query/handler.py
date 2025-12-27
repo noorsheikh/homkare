@@ -1,9 +1,9 @@
 import json
 
-import boto3
+from clients.factory import get_s3_vector_client
 from rag_engine import Config, generate_answer, get_embedding, rerank_chunks
 
-s3vector = boto3.client('s3vectors')
+s3vector_client = get_s3_vector_client()
 
 
 def lambda_handler(event, context):
@@ -13,7 +13,7 @@ def lambda_handler(event, context):
 	body = json.loads(event['body'])
 	query = body['query']
 
-	response = s3vector.query_vectors(
+	response = s3vector_client.query_vectors(
 		vectorBucketName=Config.VECTOR_BUCKET,
 		indexName=Config.VECTOR_INDEX,
 		topK=20,
